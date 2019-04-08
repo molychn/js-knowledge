@@ -1,0 +1,27 @@
+{
+  "name": "js-knowledge",
+  "version": "1.0.0",
+  "description": "Analyse the way to realize it",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/molychn/js-knowledge.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/molychn/js-knowledge/issues"
+  },
+  "homepage": "https://github.com/molychn/js-knowledge#readme",
+  "devDependencies": {
+    "mocha": "^6.1.1",
+    "power-assert": "^1.6.1"
+  }
+}

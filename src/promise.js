@@ -205,7 +205,6 @@ function valuePromise (value) {
   let p = new Promise(function () {})
   p.status = FULFILLED
   p.value = value
-  console.log(p)
   return p
 }
 
