@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>svg path</title>
+  <style>
+    /* *{
+      margin: 0;
+      padding: 0;
+    }
+    html, body{
+      width: 100%;
+      height: 100%;
+    }
+    body{
+      position: relative;
+    }
+    #line-box{
+      width: 500px;
+      height: 350px;
+      background: #ebebeb;
+    }
+    svg{
+      width: 100%;
+      height: 100%;
+    }
+    #scale{
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
+      transform: scale(0.5);
+    } */
+  </style>
+</head>
+<body>
+  <!-- <div style="width:100px;height:100px;background:gray;transform: matrix(1,0,0,1,0,0)"></div> -->
+  <!-- <div id="line-box">
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+      <defs>
+          <marker id='markerArrow' markerWidth='13' markerHeight='13' refx='2' refy='6' orient='auto'>
+              <path d='M2,2 L2,11 L10,6 L2,2' style='fill:#00ff00' />
+          </marker>
+          <marker id="markerStartArrow"
+          viewBox="0 0 30 30" refX="10" refY="25"
+          markerUnits="strokeWidth" markerWidth="9" markerHeight="20"
+          style='fill:#00ff00'
+          orient="auto">
+          <path d="M0,25,A12.5,12.5,0,1,1,0,25.01Z"/>
+          </marker>
+      </defs>
+      <path d="M 20 330 C 480 330, 20 20, 480 20" stroke="black" fill="none" class="line-body" marker-start="url(#markerStartArrow)" marker-end="url(#markerArrow)"/>
+    </svg>
+  </div> -->
+  <!-- <div id="scale">111111</div> -->
+  <div>
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%">
+      <defs>
+          <marker id='markerArrow' markerWidth='13' markerHeight='13' refx='2' refy='6' orient='auto'>
+              <path d='M2,2 L2,11 L10,6 L2,2' style='fill:#569FFF' />
+          </marker>
+          <marker id="markerStartArrow"
+          viewBox="0 0 30 30" refX="10" refY="25"
+          markerUnits="strokeWidth" markerWidth="9" markerHeight="20"
+          style='fill:#569FFF'
+          orient="auto">
+          <path d="M0,25,A12.5,12.5,0,1,1,0,25.01Z"/>
+          </marker>
+      </defs>
+      <path d="M10 10, L20 10, L20 50, 50 50" stroke="#569FFF" fill="none" class="line-body" marker-start="url(#markerStartArrow)" marker-end="url(#markerArrow)"/>
+    </svg>
+  </div>
+<script>
+  // 获取body节点
+  let body = document.getElementsByTagName('body')[0]
+  // 默认点击状态
+  let pathClick = false
+  let startPageX = startPageY = endPageX = endPageY = 0
+  let divTarget
+  body.addEventListener('click', function (e) {
+    if (!pathClick) {
+      // 获取开始点击坐标
+      startPageX = endPageX = e.pageX
+      startPageY = endPageY = e.pageY
+      divTarget = createLineBox(startPageX, startPageY, endPageX, endPageY)
+      pathClick = true
+    } else {
+      endPageX = e.pageX
+      endPageY = e.pageY
+      pathClick = false
+    }
+    console.log(e)
+  })
+  body.addEventListener('mousemove', function (e) {
+    if (!pathClick) return
+    endPageX = e.pageX
+    endPageY = e.pageY
+    changeLineBox(divTarget, startPageX, startPageY, endPageX, endPageY)
+  })
+  // body.addEventListener('mousemove', test)
+  // function test (e) {
+  //   console.log(e)
+  // }
+  body.addEventListener('mousewheel', function (e) {
+    e.preventDefault()
+    console.log(e.deltaX, e.deltaY)
+    // console.log(e)
+  }, {passive: false})
+
+
+  function createLineBox (startPageX, startPageY, endPageX, endPageY) {
+    let div = document.createElement('div')
+    div.style.width = Math.abs(startPageX - endPageX) + 40 + 'px'
+    div.style.height = Math.abs(startPageY - endPageY) + 40 + 'px'
+    div.style.position = 'absolute'
+    div.style.top = (startPageY - 20) + 'px'
+    div.style.left = (startPageX - 20) + 'px'
+    div.style.background = '#ebebeb'
+
+    // 创建svg
+    let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    svg.setAttribute('width', '100%')
+    svg.setAttribute('height', '100%')
+    let path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+    // path.setAttribute('d', 'M 20 330 C 480 330, 20 20, 480 20')
+    path.setAttribute('stroke', 'black')
+    path.setAttribute('fill', 'none')
+    path.setAttribute('class', 'line-body')
+
+    svg.appendChild(path)
+    div.appendChild(svg)
+    body.appendChild(div)
+    return {div, path}
+  }
+  function changeLineBox (target, startPageX, startPageY, endPageX, endPageY) {
+    target.div.style.width = Math.abs(startPageX - endPageX) + 40 + 'px'
+    target.div.style.height = Math.abs(startPageY - endPageY) + 40 + 'px'
+    target.div.style.top = startPageY > endPageY ?
+    (endPageY - 20) + 'px' : (startPageY - 20) + 'px'
+    target.div.style.left = startPageX > endPageX ?
+    (endPageX - 20) + 'px' : (startPageX - 20) + 'px'
+    if (startPageY == endPageY) {
+      if (startPageX <= endPageX) {
+        target.path.setAttribute('d', 'M20 20 L' + Number(Math.abs(startPageX - endPageX) + 20) + ' 20')
+      } else {
+        target.path.setAttribute('d', 'M' + Number(Math.abs(startPageX - endPageX) + 20) + ' 20 L20 20')
+      }
+    } else {
+      if (startPageY > endPageY) {
+        target.path.setAttribute('d',
+          'M20 ' + Number(Math.abs(startPageY - endPageY) + 20) +
+          ' C' + Number(Math.abs(startPageX - endPageX) + 20) + ' ' + Number(Math.abs(startPageY - endPageY) + 20) + ', ' +
+          '20 20, ' +
+          Number(Math.abs(startPageX - endPageX) + 20) + ' 20'
+        )
+      } else {
+        target.path.setAttribute('d',
+          'M20 20' +
+          ' C' + Number(Math.abs(startPageX - endPageX) + 20) + ' 20, ' +
+          '20 ' + Number(Math.abs(startPageY - endPageY) + 20) + ', ' +
+          Number(Math.abs(startPageX - endPageX) + 20) + ' ' + Number(Math.abs(startPageY - endPageY) + 20)
+        )
+      }
+    }
+  }
+</script>
+</body>
+</html>
