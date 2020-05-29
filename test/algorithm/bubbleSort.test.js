@@ -19,4 +19,10 @@ describe('bubble sort test', () => {
       assert.equal(bubbleSort({}), false)
     })
   })
+  context('array sort', () => {
+    let randData = [5, 34, 5, 45, 34, 65, 8, 34, 22, 55, 7, 233, 567]
+    it('sorting', () => {
+      assert.deepEqual(bubbleSort(randData), [5, 5, 7, 8, 22, 34, 34, 34, 45, 55, 65, 233, 567])
+    })
+  })
 })
