@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "node --environment TARGET:web-full-dev src/vue/index.js",
     "test": "mocha --require babel-core/register test/index.test.js",
-    "babel": "babel src/babel/dataTrans.js --out-dir src/babel/result.js"
+    "babel": "babel src/babel/dataTrans.js --out-dir src/babel/result.js",
+    "promiseA": "promises-aplus-tests test/promiseA.test.js"
   },
   "repository": {
     "type": "git",
@@ -33,7 +34,8 @@
     "babel-register": "^6.26.0",
     "cross-spawn": "^6.0.5",
     "mocha": "^6.1.4",
-    "power-assert": "^1.6.1"
+    "power-assert": "^1.6.1",
+    "promises-aplus-tests": "^2.1.2"
   },
   "dependencies": {}
 }
