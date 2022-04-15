@@ -9,20 +9,20 @@ const Promise = require("../src/promiseA")
     // III. 如果不是promise但却具有then方法，则尝试call调用它
     // IV. 以上都不是的情况下执行resolve，改变promise1的state状态，执行transition
     // V. transition更改state，存储result，并按顺序执行完handlers队列的所有任务
-let promise1 = new Promise((resolve, reject) => {
-  console.log('promise1')
-  // do something then resolve or reject
-  let result = 1
-  resolve(result)
-}).then(res => {
-  console.log('res: ', res)
-  return Promise.resolve(2)
-}).then(res1 => {
-  console.log('res1: ', res1)
-  return new Error('return an error')
-}).then(res2 => {
-  console.log('res2: ', res2)
-})
+// let promise1 = new Promise((resolve, reject) => {
+//   console.log('promise1')
+//   // do something then resolve or reject
+//   let result = 1
+//   resolve(result)
+// }).then(res => {
+//   console.log('res: ', res)
+//   return Promise.resolve(2)
+// }).then(res1 => {
+//   console.log('res1: ', res1)
+//   return new Error('return an error')
+// }).then(res2 => {
+//   console.log('res2: ', res2)
+// })
 
 // new Promise初始化了第一个Promise实例 promise1
 // 执行promise1内的程序
@@ -40,3 +40,19 @@ let promise1 = new Promise((resolve, reject) => {
 // })
 // notifyAll()
 // notifyAll()
+
+let promise0 = new Promise((resolve, reject) => {
+	resolve(1)
+	reject(new Error('something wrong'))
+})
+promise0.then(result => {
+	return Promise.resolve(2)
+}, error => {
+	// it may receive the error about 'something wrong'
+	console.log(error)
+}).then(result1 => {
+	return 3
+}).then(result2 => {
+	// console.log(result2)
+  return 4
+})

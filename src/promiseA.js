@@ -10,6 +10,8 @@ const isFunction = obj => typeof obj === 'function'
 const isObject = obj => !!(obj && typeof obj === 'object')
 const isThenable = obj => (isFunction(obj) || isObject(obj)) && 'then' in obj
 const isPromise = promise => promise instanceof Promise
+let promiseId = 1
+let setTimeoutId = 1
 
 // 一个promise一定具备三种状态：pending，fulfilled或rejected
 // 当状态是pending时，它只能向fulfilled或rejected转变
@@ -23,8 +25,9 @@ function Promise (f) {
   this.state = PENDING
   this.result = null
   this.handlers = []
-  this.random = Math.random()
-  console.log(this.random)
+  this.random = `promise${promiseId}`
+  promiseId++
+  console.log('random init: ', this.random)
 
   let onFulfilled = value => transition(this, FULFILLED, value)
   let onRejected = reason => transition(this, REJECTED, reason)
@@ -49,11 +52,11 @@ function Promise (f) {
 }
 
 const transition = (promise, state, result) => {
-  console.log('transition', promise.random)
+  console.log('transition', promise.random, state)
   if (promise.state !== PENDING) return
   promise.state = state
   promise.result = result
-  console.log('state', promise.state)
+  // console.log('state', promise.state)
   notifyAll(promise)
 }
 
@@ -62,7 +65,7 @@ const transition = (promise, state, result) => {
 // then可以被调用多次，每次注册一组onFulfilled和onRejected的callback，调用时需按照注册顺序调用
 // then必须返回promise
 Promise.prototype.then = function (onFulfilled, onRejected) {
-  console.log(this.random, this.handlers)
+  // console.log(this.random, this.handlers)
   return new Promise((resolve, reject) => {
     this.handlers.push({onFulfilled, onRejected, resolve, reject})
     console.log(this.random, this.handlers, this.state)
@@ -89,6 +92,8 @@ const notify = (handler, state, result) => {
 }
 const notifyAll = delay(promise => {
   let {handlers, state, result, random} = promise
+  console.log(`setTimeout${setTimeoutId} init`)
+  setTimeoutId++
   console.log('notifyAll', random, handlers)
   while (handlers.length) {
     notify(handlers.shift(), state, result)
@@ -99,7 +104,7 @@ const notifyAll = delay(promise => {
 // a.如果x是promise本身，抛出TypeError错误
 // b.如果x是一个promise，那么沿用它的state和result状态，也就是按promise的流程进行
 // c.如果x是一个Object或Function
-  // 1.取then方法作为x.then
+  // 1.尝试将then指向x.then
   // 2.如果检索x.then抛出错误e，则将e作为reason reject
   // 3.如果then是一个函数，则then.call(x, resolvePromise, rejectPromise)
     // I.如果resolvePromise called值为y，执行[[Resolve]](promise, y)
@@ -107,26 +112,26 @@ const notifyAll = delay(promise => {
     // III.如果同时调用了resolvePromise和rejectPromise，或者对同一个参数进行了多次调用，则第一个调用优先，并且任何进一步的调用都将被忽略。
     // IV.如果call抛出错误，则忽略所有执行的resolvePromise和rejectPromise，同时reject该错误
   // 4.then不是函数，直接用x作为当前promise的fulfill value
-const resolvePromise = (promise, result, resolve, reject) => {
+const resolvePromise = (promise, result, onFulfilled, onRejected) => {
   console.log('result: ', result)
   if (result === promise) {
     let reason = new TypeError('Can not fulfill promise with itself')
-    return reject(reason)
+    return onRejected(reason)
   }
   if (isPromise(result)) {
-    return result.then(resolve, reject)
+    return result.then(onFulfilled, onRejected)
   }
   if (isThenable(result)) {
     try {
       let then = result.then
       if (isFunction(then)) {
-        return new Promise(then.bind(result)).then(resolve, reject)
+        return new Promise(then.bind(result)).then(onFulfilled, onRejected)
       }
     } catch (error) {
-      return reject(error)
+      return onRejected(error)
     }
   }
-  resolve(result)
+  onFulfilled(result)
 }
 
 Promise.prototype.catch = function(onRejected) {
