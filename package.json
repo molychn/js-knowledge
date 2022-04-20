@@ -11,7 +11,8 @@
     "test": "mocha --require babel-core/register test/index.test.js",
     "babel": "babel src/babel/dataTrans.js --out-dir src/babel/result.js",
     "promiseA": "promises-aplus-tests test/promiseA.test.js",
-    "type": "mocha test/whatUrTypeIs.test.js"
+    "type": "mocha test/whatUrTypeIs.test.js",
+    "deepClone": "mocha test/deepClone.test.js"
   },
   "repository": {
     "type": "git",
