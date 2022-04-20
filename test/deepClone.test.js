@@ -10,4 +10,12 @@ describe('Deep clone test', () => {
       done()
     })
   })
+  context('test loop reference', () => {
+    it('obj = { foo: 1}; obj.bar = obj; const obj2 = deepClone(obj)', (done) => {
+      const obj = { foo: 1}
+      obj.bar = obj
+      const obj2 = deepClone(obj)
+      done()
+    })
+  })
 })
