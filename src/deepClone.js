@@ -1,6 +1,6 @@
 const whatUrTypeIs = require('./whatUrTypeIs')
 const deepClone =  (obj, parent = null) => {
-  if (typeof obj !== 'object') return null
+  if (obj === null || typeof obj !== 'object') return obj
 
   let ret = whatUrTypeIs(obj) === 'object' ? {} : []
   // 检测对象循环引用
