@@ -7,14 +7,25 @@
 // 一个基本实现就是在“读取”(getter)时将副作用函数放置到对应的 bucket 中,
 // 在“设置”(setter)时将副作用函数从 bucket 中取出执行
 let activeEffect;
+// effect 栈
+// 由于同一时刻只能有一个 activeEffect，而当副作用函数发生嵌套时，内部的 effect 会覆盖 activeEffect 的值
+// 因此创建一个 effect 栈来管理 effect 的执行
+const effectStack = [];
+
 export const effect = (fn) => {
   const effectFn = () => {
     // 每次执行 effectFn 时将相关的依赖清除掉
     cleanDep(effectFn);
     // effectFn 执行时就将该副作用函数赋值给 activeEffect
     activeEffect = effectFn;
+    // 每执行一个 effectFn 时就往 effectStack 内压入
+    effectStack.push(effectFn);
     // 执行函数
     fn();
+    // 执行完后就弹出
+    effectStack.pop();
+    // 改变 activeEffect 的指向
+    activeEffect = effectStack[effectStack.length - 1];
   };
   // 创建 deps 数组存放副作用函数相关联的依赖集合
   effectFn.deps = [];
