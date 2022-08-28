@@ -71,8 +71,14 @@ const trigger = (target, key) => {
   const effects = depsMap.get(key);
   // 由于 cleanDep 清除依赖，副作用执行时又收集依赖，会出现无限循环
   // 所以创建一个副本进行执行
-  const effectsToRun = new Set(effects);
-  effectsToRun && effectsToRun.forEach(fn => fn());
+  const effectsToRun = new Set();
+  effects && effects.forEach(effectFn => {
+    // 增加守卫判断 trigger 触发执行的副作用与当前执行的副作用函数相同，则不执行
+    if (effectFn !== activeEffect) {
+      effectsToRun.add(effectFn);
+    }
+  })
+  effectsToRun.forEach(fn => fn());
 }
 
 const reactive = (data) => {
