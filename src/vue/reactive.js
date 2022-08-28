@@ -8,11 +8,29 @@
 // 在“设置”(setter)时将副作用函数从 bucket 中取出执行
 let activeEffect;
 export const effect = (fn) => {
-  // 指向副作用函数 fn
-  activeEffect = fn;
+  const effectFn = () => {
+    // 每次执行 effectFn 时将相关的依赖清除掉
+    cleanDep(effectFn);
+    // effectFn 执行时就将该副作用函数赋值给 activeEffect
+    activeEffect = effectFn;
+    // 执行函数
+    fn();
+  };
+  // 创建 deps 数组存放副作用函数相关联的依赖集合
+  effectFn.deps = [];
   // 执行副作用函数
-  fn();
+  effectFn();
 }
+const cleanDep = (effectFn) => {
+  // 遍历 effectFn.deps 数组
+  for (let i = 0; i < effectFn.deps.length; i++) {
+    const deps = effectFn.deps[i];
+    deps.delete(effectFn);
+  }
+  // 重置数组
+  effectFn.deps.length = 0
+}
+
 const bucket = new WeakMap();
 
 const track = (target, key) => {
@@ -31,6 +49,8 @@ const track = (target, key) => {
   }
   // 把当前激活的副作用函数添加到 bucket 中
   deps.add(activeEffect);
+  // 副作用函数需要收集依赖，而 deps 就是与副作用相关的依赖集合
+  activeEffect.deps.push(deps);
 }
 const trigger = (target, key) => {
   // 根据 target 从 bucket 中取 depsMap
@@ -38,7 +58,10 @@ const trigger = (target, key) => {
   if (!depsMap) return;
   // 拿出跟 key 相关的所有副作用函数执行
   const effects = depsMap.get(key);
-  effects && effects.forEach(fn => fn());
+  // 由于 cleanDep 清除依赖，副作用执行时又收集依赖，会出现无限循环
+  // 所以创建一个副本进行执行
+  const effectsToRun = new Set(effects);
+  effectsToRun && effectsToRun.forEach(fn => fn());
 }
 
 const reactive = (data) => {
