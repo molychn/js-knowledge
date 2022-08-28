@@ -12,7 +12,7 @@ let activeEffect;
 // 因此创建一个 effect 栈来管理 effect 的执行
 const effectStack = [];
 
-export const effect = (fn) => {
+export const effect = (fn, options = {}) => {
   const effectFn = () => {
     // 每次执行 effectFn 时将相关的依赖清除掉
     cleanDep(effectFn);
@@ -27,6 +27,8 @@ export const effect = (fn) => {
     // 改变 activeEffect 的指向
     activeEffect = effectStack[effectStack.length - 1];
   };
+  // 挂载上 options
+  effectFn.options = options;
   // 创建 deps 数组存放副作用函数相关联的依赖集合
   effectFn.deps = [];
   // 执行副作用函数
@@ -78,7 +80,15 @@ const trigger = (target, key) => {
       effectsToRun.add(effectFn);
     }
   })
-  effectsToRun.forEach(fn => fn());
+  effectsToRun.forEach(effectFn => {
+    // 如果 options 存在调度器，则调用该调度器
+    if (effectFn.options.scheduler) {
+      // 把 effectFn 传给调度器，将控制权给会到用户
+      effectFn.options.scheduler(effectFn);
+    } else {
+      effectFn();
+    }
+  });
 }
 
 const reactive = (data) => {
