@@ -21,7 +21,15 @@ export const watch = (source, cb, options = {}) => {
     () => getter(),
     {
       lazy: true,
-      scheduler: job
+      scheduler: () => {
+        // Vue3 提供了 flush 参数指定回调函数的执行时机
+        if (options.flush === 'post') {
+          const p = Promise.resolve();
+          p.then(job);
+        } else {
+          job();
+        }
+      }
     }
   )
   if (options.immediate) {
