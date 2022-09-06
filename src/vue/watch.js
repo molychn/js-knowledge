@@ -9,11 +9,20 @@ export const watch = (source, cb, options = {}) => {
   }
   // 定义旧值与新值
   let oldValue, newValue;
+  // 定义 cleanup 用于存储用户注册的过期回调
+  let cleanup;
+  // vue 中 watch 可配置 onInvalidate 参数注册过期回调
+  function onInvalidate (fn) {
+    cleanup = fn;
+  }
   const job = () => {
     // 在调度器中执行副作用函数得到新值
     newValue = effectFn();
+    if (cleanup) {
+      cleanup();
+    }
     // 将旧值和新值作为回调函数参数
-    cb(oldValue, newValue);
+    cb(oldValue, newValue, onInvalidate);
     // 更新旧值
     oldValue = newValue;
   }
