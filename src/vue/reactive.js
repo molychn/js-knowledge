@@ -21,18 +21,24 @@ export const effect = (fn, options = {}) => {
     // 每执行一个 effectFn 时就往 effectStack 内压入
     effectStack.push(effectFn);
     // 执行函数
-    fn();
+    const res = fn();
     // 执行完后就弹出
     effectStack.pop();
     // 改变 activeEffect 的指向
     activeEffect = effectStack[effectStack.length - 1];
+    return res;
   };
   // 挂载上 options
   effectFn.options = options;
   // 创建 deps 数组存放副作用函数相关联的依赖集合
   effectFn.deps = [];
-  // 执行副作用函数
-  effectFn();
+  // 如果不是 lazy 模式
+  if (!options.lazy) {
+    // 执行副作用函数
+    effectFn();
+  }
+  // lazy 模式时不执行副作用函数，直接返回副作用函数
+  return effectFn;
 }
 const cleanDep = (effectFn) => {
   // 遍历 effectFn.deps 数组
@@ -46,7 +52,7 @@ const cleanDep = (effectFn) => {
 
 const bucket = new WeakMap();
 
-const track = (target, key) => {
+export const tracker = (target, key) => {
   // 没有 activeEffect 直接 return
   if (!activeEffect) return;
   // 根据 target 从 bucket 中取出对应的 depsMap
@@ -65,7 +71,7 @@ const track = (target, key) => {
   // 副作用函数需要收集依赖，而 deps 就是与副作用相关的依赖集合
   activeEffect.deps.push(deps);
 }
-const trigger = (target, key) => {
+export const trigger = (target, key) => {
   // 根据 target 从 bucket 中取 depsMap
   const depsMap = bucket.get(target);
   if (!depsMap) return;
@@ -95,7 +101,7 @@ const reactive = (data) => {
   const obj = new Proxy(data, {
     // getter 拦截
     get (target, key) {
-      track(target, key);
+      tracker(target, key);
       return target[key];
     },
     // setter 拦截
